@@ -6,8 +6,8 @@
     <link href="static/style.css" type="text/css" rel="stylesheet">
     <link href="static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <script type="text/javascript">
-    $(function() {
-      $('a#lemma').bind('click', function() {
+ $(function() {
+      $('a#lemma').click(function() {
         $.getJSON('/_get_entry', {
           lemma: $( this ).text()
         }, function(data) {
@@ -16,6 +16,26 @@
         return false;
       });
     });
+
+    $(function() {
+    $("#submit_button").click(function() {
+         $.ajax({
+            type: "GET",
+            url: "/handler/",
+            data: { word: $('input[id="dict_search"]').val() },
+            dataType: "json",
+            success: function(data) {
+                if (data.entryAmount == 1) {
+                $("#entry").html(data.entryHtml);
+                }
+                else {
+                $("#lemmas").html(data.entries);
+                }
+            }
+		});
+		event.preventDefault();
+	});
+});
   </script>
   </head>
   <body>
@@ -27,28 +47,30 @@
       <div class="col-sm-4">
       </div>
       <div class="col-sm-4" align="center">
-        <div class="input-group">
-        <input type="text" class="form-control" placeholder="Введите слово">
-          <span class="input-group-btn">
-            <button class="btn btn-default" type="button">Искать</button>
-          </span>
-      </div>
+        <form id="search_main">
+          <div class="input-group">
+            <input type="search" class="form-control" id="dict_search" placeholder="Введите слово">
+            <span class="input-group-btn"><input class="btn btn-default" id="submit_button" type="submit">Искать</span>
+          </div>
+          </form>
         <a href="#">Вход для администратора</a><br>
-        <a href="#">О словаре</a>
       </div>
         <div class="col-sm-4">
         </div>
       </div>
     <br>
       <hr/>
+    <div id="field_lemmas">
       <div id="lemmas">
         {% for lemma in lemmas %}
           <p><a href="javascript:void();" id="lemma">{{ lemma }}</a></p>
         {% endfor %}
       </div>
+      </div>
       <div id="entry">
         <!-- <span id="result">...</span> -->...
       </div>
     <!-- </div> -->
+  <div id="test"></div>
   </body>
 </html>
