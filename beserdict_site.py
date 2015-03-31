@@ -191,30 +191,38 @@ def get_entry():
 def search_elements(req):
     global dictTree
     results = []
-    lemmaEls = dictTree.xpath(u'/root/Lemma')
-    for lemmaEl in lemmaEls:
-        lemmaSignEl = lemmaEl.xpath(u'Lemma.LemmaSign')
-        if len(lemmaSignEl) != 1:
-            continue
-        lemma = lemmaSignEl[0].xpath(u'string()')
-        if req in lemma:
+    re_flag = 0
+    for lemma in lemmas:
+        if lemma.startswith(req):
             results.append(lemma)
+        else:
+            for symbol in req:
+                if symbol in u'[]()|*.^$?+\\//':
+                    re_flag = 1
+            if re_flag == 1:
+                regexp_request = re.search(req, lemma, flags=re.U)
+                if regexp_request is not None:
+                    results.append(lemma)
     return results
 
 @app.route('/handler/', methods=['GET'])
 def handler():
+    htmls = ''
     req = request.args.get('word')
     results = search_elements(req)
-    print results
+    divButton = '<button type="button" class="btn btn-block" id="return_all">' \
+                '<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span> Вернуть все леммы' \
+                '</button>'
+    #print results
     if len(results) == 1:
         entry = find_entry(results[0])
-        return jsonify(entryHtml = entry, entryAmount = len(results))
+        htmls = '<p><a href="javascript:void();" id="lemma">' + results[0] + '</a></p>'
+        return jsonify(entryAmount = len(results), entries = htmls, entryHtml = entry, divButton = divButton)
     else:
-        htmls = ''
         for result in results:
             htmlString = '<p><a href="javascript:void();" id="lemma">' + result + '</a></p>'
             htmls += htmlString
-        return jsonify(entryAmount = len(results), entries = htmls)
+        return jsonify(entryAmount = len(results), entries = htmls, divButton = divButton)
 
 
 def start_server():
