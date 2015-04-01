@@ -6,7 +6,7 @@
 <div id="POS">{{ psBlock['psbPS'] }}</div>
     <br>
     {% for psbMU in psBlock['psbMU'] %}
-    <div class="value">Модель управления: {{ psbMU['psbMU'] }}</div>
+    <div class="value" id="mu">Модель управления: {{ psbMU['psbMU'] }}</div>
     {% endfor %}
     <br>
     {% for psNounGram in psBlock['psNounGram'] %}
