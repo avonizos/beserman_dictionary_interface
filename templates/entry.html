@@ -4,10 +4,12 @@
 {% for psBlock in psBlocks %}
 <div id="PsBlock">
 <div id="POS">{{ psBlock['psbPS'] }}</div>
+    <div id="mu">
     <br>
     {% for psbMU in psBlock['psbMU'] %}
-    <div class="value" id="mu">Модель управления: {{ psbMU['psbMU'] }}</div>
+    <div class="value">Модель управления: {{ psbMU['psbMU'] }}</div>
     {% endfor %}
+        </div>
     <br>
     {% for psNounGram in psBlock['psNounGram'] %}
     {% if 'no oblstem' not in psNounGram['oblStem'] %}

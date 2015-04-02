@@ -14,7 +14,7 @@ sessionData = {}    # session key -> dictionary with the data for current sessio
 dictTree = None
 lemmas = []
 
-def find_entry(lemma, show_mu=''):
+def find_entry(lemma):
     entryEl = find_element(lemma)
     if entryEl is None:
         return jsonify(entryHtml=u'nonono')
@@ -49,15 +49,15 @@ def find_entry(lemma, show_mu=''):
                 psNounGram[u'oblStem'] = unicode(psNounGramEl[0].xpath(u'string()'))
             psBlock[u'psNounGram'].append(psNounGram)
 
-        if show_mu != u'unchecked':
-            psBlockMUEls = psBlockEl.xpath(u'PsbMU')
-            for psBlockMUEl in psBlockMUEls:
-                psbMU = {u'psbMU': u''}
-                psbMUEl = psBlockMUEl.xpath(u'PsbMU.PsbMU')
-                if len(psbMUEl) == 1:
-                    psbMU[u'psbMU'] = unicode(psbMUEl[0].xpath(u'string()'))
-                psbMU[u'psbMU'] = re.sub(u'(&lt;|&gt;)', u'', psbMU[u'psbMU'])
-                psBlock[u'psbMU'].append(psbMU)
+
+        psBlockMUEls = psBlockEl.xpath(u'PsbMU')
+        for psBlockMUEl in psBlockMUEls:
+            psbMU = {u'psbMU': u''}
+            psbMUEl = psBlockMUEl.xpath(u'PsbMU.PsbMU')
+            if len(psbMUEl) == 1:
+                psbMU[u'psbMU'] = unicode(psbMUEl[0].xpath(u'string()'))
+            psbMU[u'psbMU'] = re.sub(u'(&lt;|&gt;)', u'', psbMU[u'psbMU'])
+            psBlock[u'psbMU'].append(psbMU)
 
         idiomEls = psBlockEl.xpath(u'Idiom')
         for idiomEl in idiomEls:
@@ -186,9 +186,7 @@ def index():
 @app.route('/_get_entry')
 def get_entry():
     lemma = request.args.get('lemma', u'', type=unicode).replace(u"'", u'')
-    show_mu = request.args.get('show_mu', u'', type=unicode)
-    entry = find_entry(lemma, show_mu)
-    print show_mu
+    entry = find_entry(lemma)
     return jsonify(entryHtml=entry)
 
 def search_elements(req):
