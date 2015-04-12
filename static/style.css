@@ -1,7 +1,6 @@
 ﻿body {
     font: Arial, Helvetica, sans-serif;
 	margin: 0;
-	background: url('fon.jpg') no-repeat; 
     background-size: cover;
     overflow-x:hidden;
    }
@@ -9,7 +8,11 @@
 h2 {
    text-align: center;
    }
-   
+
+button {
+  outline: none;
+}
+
 #container {
     width: 700px; 
     margin: 0 auto; 
@@ -39,10 +42,15 @@ h2 {
     margin-right: 15px
 }
 
+#button {
+    width:250px;
+}
+
 #entry {
     width:550px;
     float:left;
     padding:5px;
+    top: 0;
 }
 
 #headword {
@@ -78,10 +86,6 @@ h2 {
     position: relative;
     vertical-align: bottom;
     color: #2F4F4F;
-}
-
-#PsBlock {
-
 }
 
 p {
