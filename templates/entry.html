@@ -48,6 +48,13 @@
 </div>
     {% endfor %}
     </div>
+<br>
+<div id="examples">
+    {% for foundExample in foundExamples %}
+    {{ foundExample }} <br>
+    {% endfor %}
+</div>
+
 {% else %}
 <div>Информации о слове нет</div>
 {% endif %}

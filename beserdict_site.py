@@ -13,8 +13,11 @@ app.secret_key = 'k_bXnlu654Q'
 sessionData = {}    # session key -> dictionary with the data for current session
 dictTree = None
 lemmas = []
+corpusTree = None
+phrases = []
 
 def find_entry(lemma):
+    global phrases
     entryEl = find_element(lemma)
     if entryEl is None:
         return jsonify(entryHtml=u'nonono')
@@ -104,11 +107,42 @@ def find_entry(lemma):
                 example[u'exTrans'] = unicode(exTransEl[0].xpath(u'string()'))
                 value[u'examples'].append(example)
             psBlock[u'values'].append(value)
+
+    # Searching for examples from the corpus
+    foundExamples = find_examples(lemma, 5)
+
     entry = render_template(u'entry.html', lemmaSign=lemmaSign,
                             homonymNumber=homonymNumber,
                             lemmaStatus=lemmaStatus,
-                            psBlocks=psBlocks)
+                            psBlocks=psBlocks,
+                            foundExamples=foundExamples)
     return entry
+
+def find_examples(lemma, n):
+    foundPhrases = []
+    prettyPhrases = []
+    for phrase in phrases:
+        wordEls = phrase.xpath(u'words/word/item')
+        for wordEl in wordEls:
+            if lemma == unicode(wordEl.xpath(u'string()')):
+                foundPhrases.append(phrase)
+
+    for foundPhrase in foundPhrases[:n]:
+        wordEls = foundPhrase.xpath(u'words/word/item')
+        resultPhrase = u''
+        for wordEl in wordEls:
+            if resultPhrase != '' and unicode(wordEl.xpath(u'string() ')) not in u'.,':
+                resultPhrase += u' '
+            resultPhrase += unicode(wordEl.xpath(u'string()'))
+        translationEl = foundPhrase.xpath(u'item[@type="gls" and @lang="ru"]')
+        resultPhrase += u' - ' + unicode(translationEl[0].xpath(u'string() '))
+        prettyPhrases.append(resultPhrase)
+    return prettyPhrases
+
+def load_corpus(fname):
+    global corpusTree, phrases
+    corpusTree = etree.parse(fname)
+    phrases = corpusTree.xpath(u'/document/interlinear-text/paragraphs/paragraph/phrases/phrase')
 
 def load_dictionary(fname):
     global dictTree, lemmas
@@ -228,6 +262,7 @@ def handler():
 
 def start_server():
     load_dictionary(u'dict.xml')
+    load_corpus(u'corpus.xml')
     app.run(host='0.0.0.0', port=2019)
     #app.config['SERVER_NAME'] = '62.64.12.18:5000'
    
