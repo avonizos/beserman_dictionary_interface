@@ -4,9 +4,10 @@
 #import time
 from lxml import etree
 from flask import Flask, url_for, request, render_template, redirect, session, jsonify
-#import codecs
+import codecs
 import re
 import uuid
+import os
 
 app = Flask(__name__)
 app.secret_key = 'k_bXnlu654Q'
@@ -15,6 +16,31 @@ dictTree = None
 lemmas = []
 corpusTree = None
 phrases = []
+index_corpus = {}
+
+def create_index(fname):
+    dict = {}
+    res = codecs.open('index.db', 'w', 'utf-8')
+    corpusTree = etree.parse(fname)
+    documents = corpusTree.xpath(u'/document/interlinear-text/paragraphs/paragraph/phrases/phrase')
+    for i in range(len(documents)):
+        words = documents[i].xpath(u'words//word/item[@type="txt" and @lang="udm-Latn-RU-fonipa-x-emic"]')
+        for word in words:
+            if word.xpath(u'string()') not in dict.keys():
+                dict[word.xpath(u'string()')] = [i]
+            else:
+                if i not in dict[word.xpath(u'string()')]:
+                    dict[word.xpath(u'string()')].append(i)
+    for key in dict:
+        res.write(key + u'|')
+        for i in range(len(dict[key])):
+            if i != len(dict[key]) - 1:
+                res.write(str(dict[key][i]) + ',')
+            else:
+                res.write(str(dict[key][i]) + '\n')
+        #print key, u'|', dict[key]
+    res.close()
+    return res
 
 def find_entry(lemma):
     global phrases
@@ -109,40 +135,53 @@ def find_entry(lemma):
             psBlock[u'values'].append(value)
 
     # Searching for examples from the corpus
-    foundExamples = find_examples(lemma, 5)
-
+    n = 5
+    foundExamples = find_examples(lemma, n)
     entry = render_template(u'entry.html', lemmaSign=lemmaSign,
                             homonymNumber=homonymNumber,
                             lemmaStatus=lemmaStatus,
                             psBlocks=psBlocks,
-                            foundExamples=foundExamples)
+                            foundExamples=foundExamples,
+                            )
+
     return entry
 
 def find_examples(lemma, n):
+    global phrases
     foundPhrases = []
     prettyPhrases = []
-    for phrase in phrases:
-        wordEls = phrase.xpath(u'words/word/item')
-        for wordEl in wordEls:
-            if lemma == unicode(wordEl.xpath(u'string()')):
-                foundPhrases.append(phrase)
+    if lemma in index_corpus.keys():
+        foundIds = index_corpus[lemma]
+        for i in foundIds:
+            foundPhrases.append(phrases[int(i)])
 
-    for foundPhrase in foundPhrases[:n]:
-        wordEls = foundPhrase.xpath(u'words/word/item')
-        resultPhrase = u''
-        for wordEl in wordEls:
-            if resultPhrase != '' and unicode(wordEl.xpath(u'string() ')) not in u'.,':
-                resultPhrase += u' '
-            resultPhrase += unicode(wordEl.xpath(u'string()'))
-        translationEl = foundPhrase.xpath(u'item[@type="gls" and @lang="ru"]')
-        resultPhrase += u' - ' + unicode(translationEl[0].xpath(u'string() '))
-        prettyPhrases.append(resultPhrase)
+        for foundPhrase in foundPhrases[:n]:
+                wordEls = foundPhrase.xpath(u'words/word/item')
+                resultPhrase = u''
+                for wordEl in wordEls:
+                    if resultPhrase != '' and unicode(wordEl.xpath(u'string() ')) not in u'.,':
+                        resultPhrase += u' '
+                    resultPhrase += unicode(wordEl.xpath(u'string()'))
+                translationEl = foundPhrase.xpath(u'item[@type="gls" and @lang="ru"]')
+                resultPhrase += u' - ' + unicode(translationEl[0].xpath(u'string() '))
+                prettyPhrases.append(resultPhrase)
     return prettyPhrases
 
 def load_corpus(fname):
-    global corpusTree, phrases
+    global corpusTree, phrases, index_corpus
     corpusTree = etree.parse(fname)
     phrases = corpusTree.xpath(u'/document/interlinear-text/paragraphs/paragraph/phrases/phrase')
+    if not os.path.isfile('index.db'):
+        print 'Making index...'
+        create_index('corpus.xml')
+    f = codecs.open('index.db', 'r', 'utf-8')
+    find_word = re.compile('([^0-9\|, ]*)|')
+    find_ids = re.compile('[0-9]+')
+    for line in f:
+        word = re.search(find_word, line)
+        ids = re.findall(find_ids, line)
+        if word is not None and ids is not None:
+            index_corpus[word.group(1)] = ids
 
 def load_dictionary(fname):
     global dictTree, lemmas
