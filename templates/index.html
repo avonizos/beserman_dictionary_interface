@@ -1,216 +1,138 @@
 ﻿<!DOCTYPE html>
 <html>
-  <head>
-      <title>Бесермянский словарь</title>
-    <script src="static/jquery.min.js"></script>
-    <script src="static/bootstrap/js/bootstrap.min.js"></script>
-    <link href="static/style.css" type="text/css" rel="stylesheet">
-    <link href="static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-       <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<head>
+    <title>Бесермянский словарь</title>
+    <script type="text/javascript" src="../static/js/lib/jquery.min.js"></script>
+    <script type="text/javascript" src="../static/js/beserdict.js"></script>
+    <script type="text/javascript" src="../static/js/keyboard.js"></script>
+    <script type="text/javascript" src="../static/css/lib/bootstrap/js/bootstrap.min.js"></script>
+    <link href="../static/css/style.css" type="text/css" rel="stylesheet">
+    <link href="../static/css/keyboard.css" type="text/css" rel="stylesheet">
+    <link href="../static/css/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
-  <script type="text/javascript">
-    var mu = '';
-
-    $(function()  {
-    $('#save_changes').click(function() {
-        if ($("#show_mu").is(":checked")) {
-            mu = 'checked';
-        }
-        else {
-            mu = 'unchecked';
-        }
-        $('#myModal2').modal('hide');
-    });
-    });
-
-     $(function()  {
-    $('#reset_changes').click(function() {
-      $("#show_mu").prop('checked', false);
-    });
-    });
-
-    $(function()  {
-    $('#sign_in_button').click(function() {
-        if ($('#inputLogin').val() == 'admin' && $('#inputPassword').val() == '123')
-        {
-        $('#myModal1').modal('hide');
-        $('#myModal2').modal('show');
-        }
-        else {alert('Неверный логин или пароль!');}
-    });
-    });
-
-      $(function()  {
-    $('#reset_button').click(function() {
-        $('input[id="dict_search"]').val('');
-    });
-    });
-
-
-   $(function()  {
-    $('#button').click(function() {
-      $.ajax({
-            type: "GET",
-            url: "/handler/",
-            data: { word: ".*" },
-            dataType: "json",
-            success: function(data) {
-                $("#button").html('');
-                $("#lemmas").html(data.entries);
-                showEntry();
-                }
-            });
-		});
-	});
-
-    function showEntry() {
-      $('a#lemma').click(function() {
-        $.getJSON('/_get_entry', {
-          lemma: $( this ).text()
-        }, function(data) {
-        $('html, body').css('position', 'relative');
-          $("#entry").html(data.entryHtml);
-          if (mu == 'unchecked') {
-            $('#mu').hide();
-            }
-        });
-        return false;
-      });
-    }
-
- $(function() {showEntry();});
-
-    $(function() {
-    $("#submit_button").click(function(event) {
-         $.ajax({
-            type: "GET",
-            url: "/handler/",
-            data: { word: $('input[id="dict_search"]').val() },
-            dataType: "json",
-            success: function(data) {
-             $("#button").html(data.divButton);
-                if (data.entryAmount == 1) {
-                $("#lemmas").html(data.entries);
-                $("#entry").html(data.entryHtml);
-                showEntry();
-                }
-                else {
-                $("#lemmas").html(data.entries);
-                showEntry();
-                //alert(data.entries);
-                }
-            }
-		});
-		event.preventDefault();
-	});
-});
-  </script>
-  </head>
-  <body>
-    <!-- <div id="container"> -->
-      <div id="header">
-        <h3 align="center">Бесермянский словарь</h3>
-      </div>
-    <div class="row">
-      <div class="col-sm-4">
-      </div>
-      <div class="col-sm-4" align="center">
+</head>
+<body>
+<!-- <div id="container"> -->
+<div id="header">
+    <h3 align="center">Бесермянский словарь</h3>
+</div>
+<div class="row">
+    <div class="col-sm-4">
+    </div>
+    <div class="col-sm-4" align="center">
         <form id="search_main">
-          <div class="input-group">
-            <input type="search" class="form-control" id="dict_search" placeholder="Введите слово">
+            <div class="input-group">
+                <input onclick="$.getScript('../static/js/keyboard.js')" data-toggle="popover" data-placement="bottom" data-content="" type="search" class="form-control" id="dict_search" placeholder="Введите слово">
             <span class="input-group-btn">
                 <button class="btn btn-default" id="submit_button" type="submit">Искать</button>
                 <button class="btn btn-default" id="reset_button" type="button">Очистить</button>
                 <button type="button" class="btn btn-default" aria-label="Left Align" data-toggle="modal" data-target="#myModal">
-                <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+                    <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
                 </button>
                  <button type="button" class="btn btn-default" aria-label="Left Align" data-toggle="modal" data-target="#myModal1">
-                <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
-                </button>
+                     <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                 </button>
             </span>
-          </div>
-          </form>
+            </div>
+        </form>
 
-      </div>
-
-        <div class="col-sm-4">
+        <div id="udm">
+            <ul id="keyboard">
+                <li class="symbol"><span class="off">ə</span><span class="on">Ə</span></li>
+                <li class="symbol"><span class="off">ɨ</span><span class="on">Ɨ</span></li>
+                <li class="symbol"><span class="off">č</span><span class="on">Č</span></li>
+                <li class="symbol"><span class="off">š</span><span class="on">Š</span></li>
+                <li class="symbol"><span class="off">ǯ</span><span class="on">Ǯ</span></li>
+                <li class="symbol"><span class="off">ž</span><span class="on">Ž</span></li>
+                <li class="symbol"><span class="off">ɤ</span>
+                <li class="symbol"><span class="off">ʼ</span>
+                <li class="symbol"><span class="off">’</span>
+                <li class="symbol"><span class="off">̑</span>
+                <li class="right-shift">shift</li>
+            </ul>
         </div>
-      </div>
 
-    <br>
-      <hr/>
+    </div>
 
-    <div id="button">
-         </div>
-      <div id="lemmas">
-        {% for lemma in lemmas %}
-          <p><a href="javascript:void();" id="lemma">{{ lemma }}</a></p>
-        {% endfor %}
-      </div>
+    <div class="col-sm-4">
+    </div>
+</div>
+
+<br>
+<hr/>
+
+<div id="button">
+</div>
+<div id="lemmas">
+    {% for lemma in lemmas %}
+    <p><a href="javascript:void(0);" id="lemma">{{ lemma }}</a></p>
+    {% endfor %}
+</div>
 
 
-      <div id="entry">
-      </div>
-    <!-- </div> -->
-  <!-- Modal -->
+<div id="entry">
+</div>
+<!-- </div> -->
+<!-- Modal -->
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Справка</h4>
-      </div>
-      <div class="modal-body">
-        Здесь будет что-нибудь написано про поиск по словарю.
-      </div>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Справка</h4>
+            </div>
+            <div class="modal-body">
+                Здесь будет что-нибудь написано про поиск по словарю.
+            </div>
+        </div>
     </div>
-  </div>
 </div>
-    <!-- Modal1 -->
+<!-- Modal1 -->
 <div class="modal fade bs-example-modal-sm" id="myModal1" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-sm">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModal1Label">Администрирование</h4>
-      </div>
-      <div class="modal-body" id="parameters">
-      <form class="form-signin">
-        <label for="inputLogin" class="sr-only">Логин</label>
-        <input type="text" id="inputLogin" class="form-control" placeholder="Логин" required autofocus>
-        <label for="inputPassword" class="sr-only">Пароль</label>
-        <input type="password" id="inputPassword" class="form-control" placeholder="Пароль" required>
-        <button class="btn btn-m btn-primary btn-block" type="button" id="sign_in_button">Войти</button>
-      </form>
-      </div>
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModal1Label">Администрирование</h4>
+            </div>
+            <div class="modal-body" id="parameters">
+                <form class="form-signin">
+                    <label for="inputLogin" class="sr-only">Логин</label>
+                    <input type="text" id="inputLogin" class="form-control" placeholder="Логин" required autofocus>
+                    <label for="inputPassword" class="sr-only">Пароль</label>
+                    <input type="password" id="inputPassword" class="form-control" placeholder="Пароль" required>
+                    <button class="btn btn-m btn-primary btn-block" type="button" id="sign_in_button">Войти</button>
+                </form>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
-  <!-- Modal2 -->
+<!-- Modal2 -->
 <div class="modal fade bs-example-modal-sm" id="myModal2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-sm">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModal2Label">Настройки</h4>
-      </div>
-      <div class="modal-body">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModal2Label">Настройки</h4>
+            </div>
+            <div class="modal-body">
            <span class="input-group-addon">
         <input type="checkbox" id="show_mu" checked> Показывать модели управлений
       </span>
-      </div>
+            </div>
 
-    <div class="modal-footer">
-        <button type="button" class="btn btn-default" id="reset_changes">Очистить</button>
-        <button type="button" class="btn btn-primary" id="save_changes">Сохранить</button>
-      </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" id="reset_changes">Очистить</button>
+                <button type="button" class="btn btn-primary" id="save_changes">Сохранить</button>
+            </div>
         </div>
-      </div>
+    </div>
 </div>
-  </body>
+</body>
 </html>
