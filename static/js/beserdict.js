@@ -30,6 +30,17 @@ $(function()  {
         $('input[id="dict_search"]').val('');
     });
 });
+
+function get_transliteration() {
+    if (trans == undefined) {
+        return 'ural'
+    }
+    $('#transliteration').click(function () {
+        trans = $('#transliteration').val();
+    });
+    return trans
+}
+
 $(function()  {
     $('#button').click(function() {
         $.ajax({
@@ -45,10 +56,13 @@ $(function()  {
         });
     });
 });
+
+
 function showEntry() {
     $('a#lemma').click(function() {
         $.getJSON('/_get_entry', {
-            lemma: $( this ).text()
+            lemma: $( this ).text(),
+            trans: $('#transliteration').val()
         }, function(data) {
             $('html, body').css('position', 'relative');
             $("#entry").html(data.entryHtml);
@@ -65,7 +79,7 @@ $(function() {
         $.ajax({
             type: "GET",
             url: "/handler/",
-            data: { word: $('input[id="dict_search"]').val() },
+            data: { word: $('input[id="dict_search"]').val(), trans: $('#transliteration').val()},
             dataType: "json",
             success: function(data) {
                 $("#button").html(data.divButton);
@@ -90,4 +104,10 @@ $(function () {
         html: true,
         content: $('#udm').html()
 });
+});
+
+// Allow Bootstrap dropdown menus to have forms/checkboxes inside,
+// and when clicking on a dropdown item, the menu doesn't disappear.
+$(document).on('click', '.dropdown-menu.dropdown-menu-form', function(e) {
+    e.stopPropagation();
 });

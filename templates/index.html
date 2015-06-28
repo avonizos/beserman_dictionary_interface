@@ -22,25 +22,31 @@
     <h3 align="center">Бесермянский словарь</h3>
 </div>
 <div class="row">
-    <div class="col-sm-4">
+    <div class="col-sm-3">
     </div>
-    <div class="col-sm-4" align="center">
-        <form id="search_main">
-            <div class="input-group">
-                <input onclick="$.getScript('../static/js/keyboard.js')" data-toggle="popover" data-placement="bottom" data-content="" type="search" class="form-control" id="dict_search" placeholder="Введите слово">
-            <span class="input-group-btn">
-                <button class="btn btn-default" id="submit_button" type="submit">Искать</button>
-                <button class="btn btn-default" id="reset_button" type="button">Очистить</button>
-                <button type="button" class="btn btn-default" aria-label="Left Align" data-toggle="modal" data-target="#myModal">
-                    <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
-                </button>
-                 <button type="button" class="btn btn-default" aria-label="Left Align" data-toggle="modal" data-target="#myModal1">
-                     <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
-                 </button>
-            </span>
-            </div>
-        </form>
-
+    <div class="col-sm-6" align="center">
+        <nav class="navbar navbar-default">
+                    <form class="navbar-form navbar-left" role="search">
+                        <div class="form-group">
+                            <input size="17" onclick="$.getScript('../static/js/keyboard.js')" data-toggle="popover" data-placement="bottom" data-content="" type="search" class="form-control" id="dict_search" placeholder="Введите слово">
+                        </div>
+                        <button class="btn btn-default" id="submit_button" type="submit">Искать</button>
+                        <button class="btn btn-default" id="reset_button" type="button">Очистить</button>
+                        <div class="form-group">
+                                <select id="transliteration" class="form-control">
+                                    <option value="ural" selected="selected">Уралистская</option>
+                                    <option value="dic">Словарная</option>
+                                    <option value="cyr">Кириллическая</option>
+                                </select>
+                        </div>
+                    <button type="button" class="btn btn-default" aria-label="Left Align" data-toggle="modal" data-target="#myModal">
+                        <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+                    </button>
+                    <button type="button" class="btn btn-default" aria-label="Left Align" data-toggle="modal" data-target="#myModal1">
+                        <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                    </button>
+                    </form>
+        </nav>
         <div id="udm">
             <ul id="keyboard">
                 <li class="symbol"><span class="off">ə</span><span class="on">Ə</span></li>
@@ -59,7 +65,7 @@
 
     </div>
 
-    <div class="col-sm-4">
+    <div class="col-sm-3">
     </div>
 </div>
 

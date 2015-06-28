@@ -18,6 +18,43 @@ corpusTree = None
 phrases = []
 index_corpus = {}
 
+cyr_match = {u'а': u'a', u'б': u'b', u'в': u'v',
+             u'г': u'д', u'е': u'e', u'ж': u'ž'}
+
+
+def convert_output(res, trans):
+    new_res = res
+    if trans == 'ural':
+        #rules here
+        pass
+
+    if trans == 'cyr':
+        for letter in res:
+            try:
+                new_letter = [key for key, value in cyr_match.iteritems() if value == letter][0]
+            except:
+                continue
+            new_res = new_res.replace(letter, new_letter)
+
+    return new_res
+
+def convert_input(req, trans):
+    new_req = req
+    if trans == 'ural':
+        #rules here
+        pass
+
+    if trans == 'cyr':
+        print req
+        for letter in req:
+            try:
+                new_letter = cyr_match[letter]
+            except:
+                continue
+            new_req = new_req.replace(letter, new_letter)
+
+    return new_req
+
 def create_index(fname):
     dict = {}
     res = codecs.open('index.db', 'w', 'utf-8')
@@ -42,8 +79,9 @@ def create_index(fname):
     res.close()
     return res
 
-def find_entry(lemma):
+def find_entry(lemma, trans):
     global phrases
+
     entryEl = find_element(lemma)
     if entryEl is None:
         return jsonify(entryHtml=u'nonono')
@@ -137,7 +175,9 @@ def find_entry(lemma):
     # Searching for examples from the corpus
     n = 5
     foundExamples = find_examples(lemma, n)
-    entry = render_template(u'entry.html', lemmaSign=lemmaSign,
+    new_res = convert_output(lemmaSign, trans)
+    print new_res, lemmaSign
+    entry = render_template(u'entry.html', lemmaSign=new_res,
                             homonymNumber=homonymNumber,
                             lemmaStatus=lemmaStatus,
                             psBlocks=psBlocks,
@@ -258,8 +298,13 @@ def index():
 
 @app.route('/_get_entry')
 def get_entry():
+    # Consider the type of transcription
     lemma = request.args.get('lemma', u'', type=unicode).replace(u"'", u'')
-    entry = find_entry(lemma)
+    trans = request.args.get('trans', u'', type=unicode)
+    print lemma, trans
+    req = convert_input(lemma, trans)
+    print req
+    entry = find_entry(req, trans)
     return jsonify(entryHtml=entry)
 
 def search_elements(req):
@@ -279,22 +324,30 @@ def search_elements(req):
                     results.append(lemma)
     return results
 
+
 @app.route('/handler/', methods=['GET'])
 def handler():
     htmls = ''
     req = request.args.get('word')
+    trans = request.args.get('trans')
+    # convert from trans -> dict
+    req = convert_input(req, trans)
     results = search_elements(req)
+    print results
     divButton = '<button type="button" class="btn btn-block" id="return_all">' \
                 '<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span> Вернуть все леммы' \
                 '</button>'
     #print results
     if len(results) == 1:
-        entry = find_entry(results[0])
-        htmls = '<p><a href="javascript:void();" id="lemma">' + results[0] + '</a></p>'
+        entry = find_entry(results[0], trans)
+        new_res = convert_output(results[0], trans)
+        print 'new_res', new_res
+        htmls = '<p><a href="javascript:void(0);" id="lemma">' + new_res + '</a></p>'
         return jsonify(entryAmount = len(results), entries = htmls, entryHtml = entry, divButton = divButton)
     else:
         for result in results:
-            htmlString = '<p><a href="javascript:void();" id="lemma">' + result + '</a></p>'
+            new_res = convert_output(result, trans)
+            htmlString = '<p><a href="javascript:void();" id="lemma">' + new_res + '</a></p>'
             htmls += htmlString
         return jsonify(entryAmount = len(results), entries = htmls, divButton = divButton)
 
