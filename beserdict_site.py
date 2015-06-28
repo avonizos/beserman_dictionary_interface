@@ -45,7 +45,6 @@ def convert_input(req, trans):
         pass
 
     if trans == 'cyr':
-        print req
         for letter in req:
             try:
                 new_letter = cyr_match[letter]
@@ -176,7 +175,6 @@ def find_entry(lemma, trans):
     n = 5
     foundExamples = find_examples(lemma, n)
     new_res = convert_output(lemmaSign, trans)
-    print new_res, lemmaSign
     entry = render_template(u'entry.html', lemmaSign=new_res,
                             homonymNumber=homonymNumber,
                             lemmaStatus=lemmaStatus,
@@ -188,23 +186,43 @@ def find_entry(lemma, trans):
 
 def find_examples(lemma, n):
     global phrases
+
+    # case for verbs
+    stem = ''
+    if lemma.endswith(u'ənə'):
+        stem = lemma[:-3]
+    elif lemma.endswith(u'nə'):
+        stem = lemma[:-2]
+    found_words = []
+    if stem != '':
+        for word in index_corpus.keys():
+            if stem in word:
+                found_words.append(word)
+    else:
+        found_words = [lemma]
+
+    #print found_words
+
     foundPhrases = []
     prettyPhrases = []
-    if lemma in index_corpus.keys():
-        foundIds = index_corpus[lemma]
-        for i in foundIds:
-            foundPhrases.append(phrases[int(i)])
 
-        for foundPhrase in foundPhrases[:n]:
-                wordEls = foundPhrase.xpath(u'words/word/item')
-                resultPhrase = u''
-                for wordEl in wordEls:
-                    if resultPhrase != '' and unicode(wordEl.xpath(u'string() ')) not in u'.,':
-                        resultPhrase += u' '
-                    resultPhrase += unicode(wordEl.xpath(u'string()'))
-                translationEl = foundPhrase.xpath(u'item[@type="gls" and @lang="ru"]')
-                resultPhrase += u' - ' + unicode(translationEl[0].xpath(u'string() '))
-                prettyPhrases.append(resultPhrase)
+    for lemma in found_words:
+        if lemma in index_corpus.keys():
+            foundIds = index_corpus[lemma]
+            for i in foundIds:
+                foundPhrases.append(phrases[int(i)])
+    i = 1
+    for foundPhrase in foundPhrases[:n]:
+            wordEls = foundPhrase.xpath(u'words/word/item')
+            resultPhrase = u''
+            for wordEl in wordEls:
+                if resultPhrase != '' and unicode(wordEl.xpath(u'string() ')) not in u'.,':
+                    resultPhrase += u' '
+                resultPhrase += unicode(wordEl.xpath(u'string()'))
+            translationEl = foundPhrase.xpath(u'item[@type="gls" and @lang="ru"]')
+            resultPhrase += u' - ' + unicode(translationEl[0].xpath(u'string() '))
+            prettyPhrases.append(str(i) + '. ' + resultPhrase)
+            i += 1
     return prettyPhrases
 
 def load_corpus(fname):
@@ -301,9 +319,7 @@ def get_entry():
     # Consider the type of transcription
     lemma = request.args.get('lemma', u'', type=unicode).replace(u"'", u'')
     trans = request.args.get('trans', u'', type=unicode)
-    print lemma, trans
     req = convert_input(lemma, trans)
-    print req
     entry = find_entry(req, trans)
     return jsonify(entryHtml=entry)
 
@@ -311,6 +327,12 @@ def search_elements(req):
     global dictTree
     results = []
     re_flag = 0
+    nomin_flag = 0
+
+    # case for nominalization request with -on ending
+    if req.endswith(u'on') and req not in lemmas:
+        req = req[:-2] + u'ənə' # add here -anə as well?
+        nomin_flag = 1
     for lemma in lemmas:
         if lemma.startswith(req):
             results.append(lemma)
@@ -322,7 +344,7 @@ def search_elements(req):
                 regexp_request = re.search(req, lemma, flags=re.U)
                 if regexp_request is not None:
                     results.append(lemma)
-    return results
+    return results, nomin_flag
 
 
 @app.route('/handler/', methods=['GET'])
@@ -332,16 +354,18 @@ def handler():
     trans = request.args.get('trans')
     # convert from trans -> dict
     req = convert_input(req, trans)
-    results = search_elements(req)
-    print results
+    print req
+    results = search_elements(req)[0]
     divButton = '<button type="button" class="btn btn-block" id="return_all">' \
                 '<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span> Вернуть все леммы' \
                 '</button>'
+    if search_elements(req)[1] == 1 and results != []:
+        nomin_alert = '<p id="nomin_alert">Слово образовано от:</p>'
+        divButton += nomin_alert
     #print results
     if len(results) == 1:
         entry = find_entry(results[0], trans)
         new_res = convert_output(results[0], trans)
-        print 'new_res', new_res
         htmls = '<p><a href="javascript:void(0);" id="lemma">' + new_res + '</a></p>'
         return jsonify(entryAmount = len(results), entries = htmls, entryHtml = entry, divButton = divButton)
     else:
