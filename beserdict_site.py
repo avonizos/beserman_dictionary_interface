@@ -13,7 +13,7 @@ app = Flask(__name__)
 app.secret_key = 'k_bXnlu654Q'
 sessionData = {}    # session key -> dictionary with the data for current session
 dictTree = None
-lemmas = []
+lemmas = {}
 corpusTree = None
 phrases = []
 index_corpus = {}
@@ -195,6 +195,8 @@ def find_entry(lemma, trans):
 def find_examples(lemma, n):
     global phrases
 
+    # case for nouns ?
+
     # case for verbs
     stem = ''
     if lemma.endswith(u'ənə'):
@@ -263,9 +265,13 @@ def load_dictionary(fname):
         homonymNumberEl = lemmaEl.xpath(u'Lemma.HomonymNumber')
         if len(homonymNumberEl) == 1:
             lemma += u' (' + homonymNumberEl[0].xpath(u'string()') + u')'
-        # print unicode(lemma)
-        lemmas.append(unicode(lemma))
 
+        transEl = lemmaEl.xpath(u'PSBlock/Value/Value.ValTr')
+        trans = ''
+        if transEl:
+            trans = transEl[0].xpath(u'string()')
+        # print unicode(lemma)
+        lemmas[unicode(lemma)] = trans
 
 def initialize_session():
     global sessionData
@@ -320,7 +326,8 @@ def find_element(lemma):
 @app.route('/')
 def index():
     global lemmas
-    return render_template(u'index.html', lemmas=lemmas)
+    return render_template(u'index.html', lemmas=sorted(lemmas.keys(), key=lambda s: s.lower())
+)
 
 @app.route('/_get_entry')
 def get_entry():
@@ -331,6 +338,14 @@ def get_entry():
     entry = find_entry(req, trans)
     return jsonify(entryHtml=entry)
 
+def search_rus(req):
+    global dictTree
+    results = []
+    for trans in lemmas.values():
+        if req in trans:
+            results.append([key for key, value in lemmas.iteritems() if value == trans][0])
+    return results
+
 def search_elements(req):
     global dictTree
     results = []
@@ -338,10 +353,17 @@ def search_elements(req):
     nomin_flag = 0
 
     # case for nominalization request with -on ending
-    if req.endswith(u'on') and req not in lemmas:
-        req = req[:-2] + u'ənə' # add here -anə as well?
+    if req.endswith(u'on') and req not in lemmas.keys():
+        req = req[:-2] + u'ənə'
         nomin_flag = 1
-    for lemma in lemmas:
+
+    # case for nominalization request with -an ending
+    if req.endswith(u'an') and req not in lemmas.keys():
+        req = req[:-2] + u'anə'
+        nomin_flag = 1
+
+
+    for lemma in lemmas.keys():
         if lemma.startswith(req):
             results.append(lemma)
         else:
@@ -357,33 +379,54 @@ def search_elements(req):
 
 @app.route('/hidden/')
 def hidden():
-    return render_template(u'index.html', lemmas=lemmas)
+    return render_template(u'index.html', lemmas=sorted(lemmas.keys(), key=lambda s: s.lower()))
 
 @app.route('/handler/', methods=['GET'])
 def handler():
     htmls = ''
-    req = request.args.get('word')
-    trans = request.args.get('trans')
-    # convert from trans -> dict
-    req = convert_input(req, trans)
-    results = search_elements(req)[0]
+
     divButton = '<button type="button" class="btn btn-block" id="return_all">' \
                 '<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span> Вернуть все леммы' \
                 '</button>'
+
+    req = request.args.get('word')
+    lang = request.args.get('lang')
+
+    if lang is None:
+        lang = 'bes'
+
+    if lang == 'bes':
+        trans = request.args.get('trans')
+        # convert from trans -> dict
+        req = convert_input(req, trans)
+        results = search_elements(req)[0]
+
+    else:
+        trans = ''
+        results = search_rus(req)
+
     if search_elements(req)[1] == 1 and results != []:
         nomin_alert = '<p id="nomin_alert">Слово образовано от:</p>'
         divButton += nomin_alert
+
     #print results
     if len(results) == 1:
         entry = find_entry(results[0], trans)
-        new_res = convert_output(results[0], trans)
+        if lang == 'bes':
+            new_res = convert_output(results[0], trans)
+        else:
+            new_res = results[0]
         htmls = '<p><a href="javascript:void(0);" id="lemma">' + new_res + '</a></p>'
         return jsonify(entryAmount = len(results), entries = htmls, entryHtml = entry, divButton = divButton)
     else:
-        for result in results:
-            new_res = convert_output(result, trans)
+        for result in sorted(results, key=lambda s: s.lower()):
+            if lang == 'bes':
+                new_res = convert_output(result, trans)
+            else:
+                new_res = result
             htmlString = '<p><a href="javascript:void();" id="lemma">' + new_res + '</a></p>'
             htmls += htmlString
+
         return jsonify(entryAmount = len(results), entries = htmls, divButton = divButton)
 
 

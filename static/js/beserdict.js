@@ -81,13 +81,29 @@ $(document).ready(function () {
     }
 });
 
+var lang;
+
+$(document).ready(function () {
+$("#lang").click(function () {
+    if ($('#lang').val() == 'bes') {
+        $('#transliteration').prop('disabled', false);
+        lang = 'bes'
+    }
+    else {
+        $('#transliteration').prop('disabled', 'disabled');
+        lang = 'rus'
+    }
+
+});
+});
+
 $(function() {showEntry();});
 $(function() {
     $("#submit_button").click(function(event) {
         $.ajax({
             type: "GET",
             url: "/handler/",
-            data: { word: $('input[id="dict_search"]').val(), trans: $('#transliteration').val()},
+            data: { word: $('input[id="dict_search"]').val(), lang: lang, trans: $('#transliteration').val()},
             dataType: "json",
             success: function(data) {
                 $("#button").html(data.divButton);

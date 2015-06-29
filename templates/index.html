@@ -22,16 +22,26 @@
     <h3 align="center">Бесермянский словарь</h3>
 </div>
 <div class="row">
-    <div class="col-sm-3">
+    <div class="col-sm-2">
     </div>
-    <div class="col-sm-6" align="center">
+    <div class="col-sm-8" align="center">
         <nav class="navbar navbar-default">
-                    <form class="navbar-form navbar-left" role="search">
+                    <form class="navbar-form" role="search">
+
                         <div class="form-group">
-                            <input size="17" onclick="$.getScript('../static/js/keyboard.js')" data-toggle="popover" data-placement="bottom" data-content="" type="search" class="form-control" id="dict_search" placeholder="Введите слово">
+                            <select id="lang" class="form-control">
+                                <option value="bes" selected="selected">бес → рус</option>
+                                <option value="rus">рус → бес</option>
+                            </select>
+                        </div>
+
+
+                        <div class="form-group">
+                            <input size="30" onclick="$.getScript('../static/js/keyboard.js')" data-toggle="popover" data-placement="bottom" data-content="" type="search" class="form-control" id="dict_search" placeholder="Введите слово">
                         </div>
                         <button class="btn btn-default" id="submit_button" type="submit">Искать</button>
                         <button class="btn btn-default" id="reset_button" type="button">Очистить</button>
+
                         <div class="form-group">
                                 <select id="transliteration" class="form-control">
                                     <option value="ural" selected="selected">Уралистская</option>
@@ -40,12 +50,16 @@
                                     <option id="corpus_trans" value="corpus" style="display: none">Корпусная</option>
                                 </select>
                         </div>
-                    <button type="button" class="btn btn-default" aria-label="Left Align" data-toggle="modal" data-target="#myModal">
-                        <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
-                    </button>
-                    <button type="button" class="btn btn-default" aria-label="Left Align" data-toggle="modal" data-target="#myModal1">
-                        <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
-                    </button>
+
+                        <div class="btn-group">
+
+                        <button type="button" class="btn btn-default" data-toggle="modal" data-target="#myModal">
+                            <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+                        </button>
+                        <button type="button" class="btn btn-default" data-toggle="modal" data-target="#myModal1">
+                            <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                        </button>
+                        </div>
                     </form>
         </nav>
         <div id="udm">
@@ -66,7 +80,7 @@
 
     </div>
 
-    <div class="col-sm-3">
+    <div class="col-sm-2">
     </div>
 </div>
 
