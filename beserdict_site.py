@@ -28,6 +28,10 @@ def convert_output(res, trans):
         #rules here
         pass
 
+    if trans == 'corpus':
+        #rules here
+        pass
+
     if trans == 'cyr':
         for letter in res:
             try:
@@ -41,6 +45,10 @@ def convert_output(res, trans):
 def convert_input(req, trans):
     new_req = req
     if trans == 'ural':
+        #rules here
+        pass
+
+    if trans == 'corpus':
         #rules here
         pass
 
@@ -347,6 +355,10 @@ def search_elements(req):
     return results, nomin_flag
 
 
+@app.route('/hidden/')
+def hidden():
+    return render_template(u'index.html', lemmas=lemmas)
+
 @app.route('/handler/', methods=['GET'])
 def handler():
     htmls = ''
@@ -354,7 +366,6 @@ def handler():
     trans = request.args.get('trans')
     # convert from trans -> dict
     req = convert_input(req, trans)
-    print req
     results = search_elements(req)[0]
     divButton = '<button type="button" class="btn btn-block" id="return_all">' \
                 '<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span> Вернуть все леммы' \

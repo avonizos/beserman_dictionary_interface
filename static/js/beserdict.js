@@ -73,6 +73,14 @@ function showEntry() {
         return false;
     });
 }
+
+$(document).ready(function () {
+    if (window.location.href.indexOf("/hidden") > -1) {
+        $('#corpus_trans').show();
+        $('#transliteration').val('corpus')
+    }
+});
+
 $(function() {showEntry();});
 $(function() {
     $("#submit_button").click(function(event) {
