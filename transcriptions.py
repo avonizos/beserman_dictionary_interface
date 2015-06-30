@@ -27,8 +27,10 @@ def convert_output(res, trans):
         pass
 
     if trans == 'corpus':
-        # rules here
-        pass
+        res = res.replace(u'ə', u'ə̑')
+        res = res.replace(u'ɤ', u'ə')
+        res = res.replace(u'ɨ', u'y')
+        res = res.replace(u'ʼ', u'’')
 
     if trans == 'cyr':
         letters = []
@@ -54,17 +56,18 @@ def convert_output(res, trans):
 
 
 def convert_input(req, trans):
-    new_req = req
     if trans == 'ural':
         # rules here
         pass
 
     if trans == 'corpus':
-        # rules here
-        pass
+        req = re.sub(u'ə(?!̑)', u'ɤ', req)
+        req = req.replace(u'ə̑', u'ə')
+        req = req.replace(u'y', u'ɨ')
+        req = req.replace(u'’', u'ʼ')
 
     if trans == 'cyr':
-        return new_req
+        return req
         # for letter in req:
         #     try:
         #         new_letter = cyr_match[letter]
@@ -72,4 +75,4 @@ def convert_input(req, trans):
         #         continue
         #     new_req = new_req.replace(letter, new_letter)
 
-    return new_req
+    return req
