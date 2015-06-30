@@ -1,13 +1,14 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-#import time
+# import time
 from lxml import etree
-from flask import Flask, url_for, request, render_template, redirect, session, jsonify
+from flask import Flask, request, render_template, session, jsonify
 import codecs
 import re
 import uuid
 import os
+from transcriptions import convert_input, convert_output
 
 app = Flask(__name__)
 app.secret_key = 'k_bXnlu654Q'
@@ -19,49 +20,6 @@ phrases = []
 index_corpus = {}
 recently = []
 
-cyr_match = {u'а': u'a', u'б': u'b', u'в': u'v',
-             u'г': u'д', u'е': u'e', u'ж': u'ž'}
-
-
-def convert_output(res, trans):
-    new_res = res
-    if trans == 'ural':
-        #rules here
-        pass
-
-    if trans == 'corpus':
-        #rules here
-        pass
-
-    if trans == 'cyr':
-        for letter in res:
-            try:
-                new_letter = [key for key, value in cyr_match.iteritems() if value == letter][0]
-            except:
-                continue
-            new_res = new_res.replace(letter, new_letter)
-
-    return new_res
-
-def convert_input(req, trans):
-    new_req = req
-    if trans == 'ural':
-        #rules here
-        pass
-
-    if trans == 'corpus':
-        #rules here
-        pass
-
-    if trans == 'cyr':
-        for letter in req:
-            try:
-                new_letter = cyr_match[letter]
-            except:
-                continue
-            new_req = new_req.replace(letter, new_letter)
-
-    return new_req
 
 def create_index(fname):
     dict = {}
@@ -83,9 +41,10 @@ def create_index(fname):
                 res.write(str(dict[key][i]) + ',')
             else:
                 res.write(str(dict[key][i]) + '\n')
-        #print key, u'|', dict[key]
+        # print key, u'|', dict[key]
     res.close()
     return res
+
 
 def find_entry(lemma, trans):
     global phrases
@@ -106,7 +65,6 @@ def find_entry(lemma, trans):
     if len(lemmaStatusEl) == 1:
         lemmaStatus = unicode(lemmaStatusEl[0].xpath(u'string()'))
 
-
     psBlocks = []
     psBlockEls = entryEl.xpath(u'PSBlock')
     for psBlockEl in psBlockEls:
@@ -123,7 +81,6 @@ def find_entry(lemma, trans):
             if len(psNounGramEl) == 1:
                 psNounGram[u'oblStem'] = unicode(psNounGramEl[0].xpath(u'string()'))
             psBlock[u'psNounGram'].append(psNounGram)
-
 
         psBlockMUEls = psBlockEl.xpath(u'PsbMU')
         for psBlockMUEl in psBlockMUEls:
@@ -193,6 +150,7 @@ def find_entry(lemma, trans):
 
     return entry
 
+
 def find_examples(lemma, n):
     global phrases
 
@@ -217,8 +175,7 @@ def find_examples(lemma, n):
             if word.startswith(lemma):
                 found_words.append(word)
 
-
-    #print found_words
+    # print found_words
 
     foundPhrases = []
     prettyPhrases = []
@@ -242,6 +199,7 @@ def find_examples(lemma, n):
             i += 1
     return prettyPhrases
 
+
 def load_corpus(fname):
     global corpusTree, phrases, index_corpus
     corpusTree = etree.parse(fname)
@@ -257,6 +215,7 @@ def load_corpus(fname):
         ids = re.findall(find_ids, line)
         if word is not None and ids is not None:
             index_corpus[word.group(1)] = ids
+
 
 def load_dictionary(fname):
     global dictTree, lemmas
@@ -280,6 +239,7 @@ def load_dictionary(fname):
         # print unicode(lemma)
         lemmas[unicode(lemma)] = trans
 
+
 def initialize_session():
     global sessionData
     session[u'session_id'] = str(uuid.uuid4())
@@ -292,7 +252,7 @@ def get_session_data(fieldName):
         dictCurData = sessionData[session[u'session_id']]
         requestedValue = dictCurData[fieldName]
         return requestedValue
-    except:
+    except KeyError:
         return None
 
 
@@ -314,7 +274,7 @@ def find_element(lemma):
     global dictTree
     homonymNum = 0
     m = re.search(u'^(.+) \\(([0-9]+)\\)$', lemma, flags=re.U)
-    if m != None:
+    if m is not None:
         lemma = m.group(1)
         homonymNum = int(m.group(2))
     try:
@@ -330,11 +290,12 @@ def find_element(lemma):
         return None
     return entryEl
 
+
 @app.route('/')
 def index():
     global lemmas
-    return render_template(u'index.html', lemmas=sorted(lemmas.keys(), key=lambda s: s.lower())
-)
+    return render_template(u'index.html', lemmas=sorted(lemmas.keys(), key=lambda s: s.lower()))
+
 
 @app.route('/_get_entry')
 def get_entry():
@@ -345,6 +306,7 @@ def get_entry():
     entry = find_entry(req, trans)
     return jsonify(entryHtml=entry)
 
+
 def search_rus(req):
     global dictTree
     results = []
@@ -352,6 +314,7 @@ def search_rus(req):
         if trans.startswith(' ' + req) or trans.startswith(req):
             results.append([key for key, value in lemmas.iteritems() if value == trans][0])
     return results
+
 
 def search_elements(req):
     global dictTree
@@ -368,7 +331,6 @@ def search_elements(req):
     if req.endswith(u'an') and req not in lemmas.keys():
         req = req[:-2] + u'anə'
         nomin_flag = 1
-
 
     for lemma in lemmas.keys():
         if lemma.startswith(req):
@@ -388,6 +350,7 @@ def search_elements(req):
 def hidden():
     return render_template(u'index.html', lemmas=sorted(lemmas.keys(), key=lambda s: s.lower()))
 
+
 @app.route('/handler/', methods=['GET'])
 def handler():
     htmls = ''
@@ -395,7 +358,6 @@ def handler():
     divButton = '<button type="button" class="btn btn-block" id="return_all">' \
                 '<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span> Вернуть все леммы' \
                 '</button>'
-
 
     req = request.args.get('word')
     lang = request.args.get('lang')
@@ -410,12 +372,11 @@ def handler():
         recently.append(req)
 
     for word in recently:
-         # will work only with request = lemma cases
-         if word in lemmas.keys():
+        # will work only with request = lemma cases
+        if word in lemmas.keys():
             recentlyHtml += '<p><a href="javascript:void(0);" id="lemma">' + word + '</a></p>'
-         else:
+        else:
             recentlyHtml += '<p>' + word + '</p>'
-
 
     if lang is None:
         lang = 'bes'
@@ -434,7 +395,7 @@ def handler():
         nomin_alert = '<p id="nomin_alert">Слово образовано от:</p>'
         divButton += nomin_alert
 
-    #print results
+    # print results
     if len(results) == 1:
         entry = find_entry(results[0], trans)
         if lang == 'bes':
@@ -452,15 +413,15 @@ def handler():
             htmlString = '<p><a href="javascript:void(0);" id="lemma">' + new_res + '</a></p>'
             htmls += htmlString
 
-        return jsonify(entryAmount = len(results), entries = htmls, recently = recentlyHtml, divButton = divButton)
+        return jsonify(entryAmount=len(results), entries=htmls,
+                       recently=recentlyHtml, divButton=divButton)
 
 
 def start_server():
     load_dictionary(u'dict.xml')
     load_corpus(u'corpus.xml')
     app.run(host='0.0.0.0', port=2019)
-    #app.config['SERVER_NAME'] = '62.64.12.18:5000'
+    # app.config['SERVER_NAME'] = '62.64.12.18:5000'
    
 if __name__ == u'__main__':
     start_server()
-
