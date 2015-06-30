@@ -84,20 +84,33 @@
     </div>
 </div>
 
+
 <br>
 <hr/>
 
-<div id="button">
-</div>
-<div id="lemmas">
-    {% for lemma in lemmas %}
-    <p><a href="javascript:void(0);" id="lemma">{{ lemma }}</a></p>
-    {% endfor %}
-</div>
+<div class="row">
+    <div class="col-sm-3">
+        <div id="button">
+        </div>
+        <div id="lemmas">
+            {% for lemma in lemmas %}
+            <p><a href="javascript:void(0);" id="lemma">{{ lemma }}</a></p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="col-sm-6">
+        <div id="entry">
+        </div>
+    </div>
+
+    <div class="col-sm-3" align="center">
+        <span id="recently_header">Недавние запросы:</span>
+        <div id="recently">
+        </div>
+    </div>
 
 
-<div id="entry">
-</div>
 <!-- </div> -->
 <!-- Modal -->
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -154,6 +167,7 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 </body>
 </html>

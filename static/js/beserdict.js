@@ -98,6 +98,7 @@ $("#lang").click(function () {
 });
 
 $(function() {showEntry();});
+
 $(function() {
     $("#submit_button").click(function(event) {
         $.ajax({
@@ -107,6 +108,7 @@ $(function() {
             dataType: "json",
             success: function(data) {
                 $("#button").html(data.divButton);
+                $("#recently").html(data.recently);
                 if (data.entryAmount == 1) {
                     $("#lemmas").html(data.entries);
                     $("#entry").html(data.entryHtml);
@@ -122,6 +124,7 @@ $(function() {
         event.preventDefault();
     });
 });
+
 
 $(function () {
     $('[data-toggle="popover"]').popover({

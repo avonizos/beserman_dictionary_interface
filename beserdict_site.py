@@ -17,6 +17,7 @@ lemmas = {}
 corpusTree = None
 phrases = []
 index_corpus = {}
+recently = []
 
 cyr_match = {u'а': u'a', u'б': u'b', u'в': u'v',
              u'г': u'д', u'е': u'e', u'ж': u'ž'}
@@ -195,8 +196,6 @@ def find_entry(lemma, trans):
 def find_examples(lemma, n):
     global phrases
 
-    # case for nouns ?
-
     # case for verbs
     stem = ''
     if lemma.endswith(u'ənə'):
@@ -204,12 +203,20 @@ def find_examples(lemma, n):
     elif lemma.endswith(u'nə'):
         stem = lemma[:-2]
     found_words = []
+
     if stem != '':
         for word in index_corpus.keys():
             if stem in word:
                 found_words.append(word)
     else:
         found_words = [lemma]
+
+    # case for nouns
+    if not found_words:
+        for word in index_corpus.keys():
+            if word.startswith(lemma):
+                found_words.append(word)
+
 
     #print found_words
 
@@ -342,7 +349,7 @@ def search_rus(req):
     global dictTree
     results = []
     for trans in lemmas.values():
-        if req in trans:
+        if trans.startswith(' ' + req) or trans.startswith(req):
             results.append([key for key, value in lemmas.iteritems() if value == trans][0])
     return results
 
@@ -389,8 +396,26 @@ def handler():
                 '<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span> Вернуть все леммы' \
                 '</button>'
 
+
     req = request.args.get('word')
     lang = request.args.get('lang')
+
+    n = 5
+    recentlyHtml = ''
+
+    if len(recently) < n:
+        recently.append(req)
+    else:
+        recently.remove(recently[0])
+        recently.append(req)
+
+    for word in recently:
+         # will work only with request = lemma cases
+         if word in lemmas.keys():
+            recentlyHtml += '<p><a href="javascript:void(0);" id="lemma">' + word + '</a></p>'
+         else:
+            recentlyHtml += '<p>' + word + '</p>'
+
 
     if lang is None:
         lang = 'bes'
@@ -424,10 +449,10 @@ def handler():
                 new_res = convert_output(result, trans)
             else:
                 new_res = result
-            htmlString = '<p><a href="javascript:void();" id="lemma">' + new_res + '</a></p>'
+            htmlString = '<p><a href="javascript:void(0);" id="lemma">' + new_res + '</a></p>'
             htmls += htmlString
 
-        return jsonify(entryAmount = len(results), entries = htmls, divButton = divButton)
+        return jsonify(entryAmount = len(results), entries = htmls, recently = recentlyHtml, divButton = divButton)
 
 
 def start_server():

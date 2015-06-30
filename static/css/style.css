@@ -53,6 +53,16 @@ button {
 
 }
 
+#recently {
+    line-height:30px;
+    border-radius: 25px;
+    background-color:#f7f9fb;
+    width:250px;
+    height:250px;
+    padding:15px;
+    font-family: Sans-serif;
+}
+
 #button {
     width:250px;
 }
