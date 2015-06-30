@@ -1,62 +1,65 @@
 ﻿{% if 'RELAX' in lemmaStatus %}
-<div class="entry">
-<div id="headword">{{ lemmaSign }}</div> {% if homonymNumber %}<div id="homonymNumber">{{ homonymNumber }}</div>{% endif %}
-{% for psBlock in psBlocks %}
-<div id="PsBlock">
-<div id="POS">{{ psBlock['psbPS'] }}</div>
-    <div id="mu">
-    <br>
-    {% for psbMU in psBlock['psbMU'] %}
-    <div class="value">Модель управления: {{ psbMU['psbMU'] }}</div>
-    {% endfor %}
+    <div class="entry">
+        <div id="headword">{{ lemmaSign }}</div> {% if homonymNumber %}<div id="homonymNumber">{{ homonymNumber }}</div>{% endif %}
+
+        {% for psBlock in psBlocks %}
+            <div id="PsBlock">
+                <div id="POS">{{ psBlock['psbPS'] }}</div>
+                    <div id="mu">
+                        <br>
+                        {% for psbMU in psBlock['psbMU'] %}
+                            <div class="value">Модель управления: {{ psbMU['psbMU'] }}</div>
+                        {% endfor %}
+                    </div>
+                    <br>
+
+                    {% for psNounGram in psBlock['psNounGram'] %}
+                        {% if 'no oblstem' not in psNounGram['oblStem'] %}
+                            <div class="value">Косвенная основа: {{ psNounGram['oblStem'] }}</div>
+                        {% endif %}
+                    {% endfor %}
+                    <br>
+
+                    {% for value in psBlock['values'] %}
+                        <br>
+                        <div class="value">{{ value['valNum'] }} {{ value['valTr'] }} </div>
+                        <br>
+                        <div class="value">{{ value['valTolk'] }}</div>
+                        <br>
+                        {% for example in value['examples'] %}
+                            {% if 'yes' in example['exGoesToDict'] %}
+                                <br>
+                                <div class="value">Пример: {{ example['exText'] }} &mdash; {{ example['exTrans'] }}</div>
+                                <br>
+                            {% endif %}
+                        {% endfor %}
+                        <br>
+                    {% endfor %}
+                    <br>
+
+                    {% for idiom in psBlock['idioms'] %}
+                        <div class="value">&loz; {{ idiom['idiomText'] }} &mdash; {{ idiom['idiomTr'] }} </div>
+                        <br>
+                        {% for example in idiom['examples'] %}
+                            {% if 'yes' in example['exGoesToDict'] %}
+                                <br>
+                                <div class="value">Пример: {{ example['exText'] }} &mdash; {{ example['exTrans'] }}</div>
+                                <br>
+                            {% endif %}
+                        {% endfor %}
+                        <br>
+                    {% endfor %}
+            </div>
+        {% endfor %}
         </div>
-    <br>
-    {% for psNounGram in psBlock['psNounGram'] %}
-    {% if 'no oblstem' not in psNounGram['oblStem'] %}
-    <div class="value">Косвенная основа: {{ psNounGram['oblStem'] }}</div>
-    {% endif %}
-    {% endfor %}
-    <br>
-{% for value in psBlock['values'] %}
         <br>
-<div class="value">{{ value['valNum'] }} {{ value['valTr'] }} </div>
-    <br>
-    <div class="value">{{ value['valTolk'] }}</div>
-    <br>
-    {% for example in value['examples'] %}
-    {% if 'yes' in example['exGoesToDict'] %}
-    <br>
-    <div class="value">Пример: {{ example['exText'] }} &mdash; {{ example['exTrans'] }}</div>
-    <br>
-    {% endif %}
-    {% endfor %}
-    <br>
-{% endfor %}
-<br>
-    {% for idiom in psBlock['idioms'] %}
-    <div class="value">&loz; {{ idiom['idiomText'] }} &mdash; {{ idiom['idiomTr'] }} </div>
-    <br>
-    {% for example in idiom['examples'] %}
-    {% if 'yes' in example['exGoesToDict'] %}
-    <br>
-    <div class="value">Пример: {{ example['exText'] }} &mdash; {{ example['exTrans'] }}</div>
-    <br>
-    {% endif %}
-    {% endfor %}
-    <br>
-{% endfor %}
-</div>
-    {% endfor %}
-    </div>
-<br>
 
-<div id="examples">
-    {% for foundExample in foundExamples %}
-    {{ foundExample }} <br>
-    {% endfor %}
-</div>
-
+        <div id="examples">
+            {% for foundExample in foundExamples %}
+                {{ foundExample }} <br>
+            {% endfor %}
+        </div>
 
 {% else %}
-<div>Информации о слове нет</div>
+    <div>Информации о слове нет</div>
 {% endif %}

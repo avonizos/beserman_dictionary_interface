@@ -1,3 +1,4 @@
+// Show/hide verb's argument structure
 var mu = '';
 $(function()  {
     $('#save_changes').click(function() {
@@ -15,6 +16,8 @@ $(function()  {
         $("#show_mu").prop('checked', false);
     });
 });
+
+// Login admin panel
 $(function()  {
     $('#sign_in_button').click(function() {
         if ($('#inputLogin').val() == 'admin' && $('#inputPassword').val() == '123')
@@ -25,22 +28,15 @@ $(function()  {
         else {alert('Неверный логин или пароль!');}
     });
 });
+
+// Reset search input form
 $(function()  {
     $('#reset_button').click(function() {
         $('input[id="dict_search"]').val('');
     });
 });
 
-function get_transliteration() {
-    if (trans == undefined) {
-        return 'ural'
-    }
-    $('#transliteration').click(function () {
-        trans = $('#transliteration').val();
-    });
-    return trans
-}
-
+// Return all lemmas after clicking on the "Return all" button
 $(function()  {
     $('#button').click(function() {
         $.ajax({
@@ -57,7 +53,7 @@ $(function()  {
     });
 });
 
-
+// Get a particular entry for the lemma
 function showEntry() {
     $('a#lemma').click(function() {
         $.getJSON('/_get_entry', {
@@ -74,6 +70,10 @@ function showEntry() {
     });
 }
 
+$(function() {showEntry();});
+
+
+// Hidden page for the corpus transliteration
 $(document).ready(function () {
     if (window.location.href.indexOf("/hidden") > -1) {
         $('#corpus_trans').show();
@@ -81,24 +81,22 @@ $(document).ready(function () {
     }
 });
 
+// Get the current direction
 var lang;
-
 $(document).ready(function () {
-$("#lang").click(function () {
-    if ($('#lang').val() == 'bes') {
-        $('#transliteration').prop('disabled', false);
-        lang = 'bes'
-    }
-    else {
-        $('#transliteration').prop('disabled', 'disabled');
-        lang = 'rus'
-    }
-
+    $("#lang").click(function () {
+        if ($('#lang').val() == 'bes') {
+            $('#transliteration').prop('disabled', false);
+            lang = 'bes'
+        }
+        else {
+            $('#transliteration').prop('disabled', 'disabled');
+            lang = 'rus'
+        }
+    });
 });
-});
 
-$(function() {showEntry();});
-
+// Action after submit search query
 $(function() {
     $("#submit_button").click(function(event) {
         $.ajax({
@@ -125,16 +123,10 @@ $(function() {
     });
 });
 
-
+// Show the keyboard
 $(function () {
     $('[data-toggle="popover"]').popover({
         html: true,
         content: $('#udm').html()
-});
-});
-
-// Allow Bootstrap dropdown menus to have forms/checkboxes inside,
-// and when clicking on a dropdown item, the menu doesn't disappear.
-$(document).on('click', '.dropdown-menu.dropdown-menu-form', function(e) {
-    e.stopPropagation();
+    });
 });

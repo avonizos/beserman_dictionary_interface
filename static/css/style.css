@@ -1,9 +1,16 @@
-﻿body {
+﻿/* Tags */
+body {
     font: Arial, Helvetica, sans-serif;
-	margin: 0;
+    font-size: 10px;
+    margin: 200px 0 0 0;
     background-size: cover;
     overflow-x:hidden;
    }
+
+p {
+    font-size: 1em;
+    margin: 5px 10px 5px 10px;
+}
 
 h2 {
    text-align: center;
@@ -13,20 +20,28 @@ button {
   outline: none;
 }
 
-#container {
-    width: 700px; 
-    margin: 0 auto; 
-	background: #00529E;
-	font-size:1.5em;
-	font-family: Sans-serif;
-    color: white;
-   } 
+ul {
+    list-style-type: none;
+    text-align: left;
+}
 
+/* Classes */
+.value {
+    float: left;
+    top: 0.3em;
+    font-size: 1em;
+    padding-left: 7px;
+    position: relative;
+    vertical-align: bottom;
+    color: #2F4F4F;
+}
+
+/* IDs */
 #header {
 	color: black;
 	padding: 5px;
 	margin: 0;
-	font-weight: bold; 
+	font-weight: bold;
 	font-size: 1.5em;
 }
 
@@ -99,30 +114,6 @@ button {
     vertical-align: bottom;
 }
 
-.value {
-    float: left;
-    top: 0.3em;
-    font-size: 1em;
-    padding-left: 7px;
-    position: relative;
-    vertical-align: bottom;
-    color: #2F4F4F;
-}
-
-p {
-font-size: 1em;
-margin: 5px 10px 5px 10px;
-}
-
-ul {
-list-style-type: none;
-text-align: left;
-}
-
-body {
-    font-size: 10px;
-    margin-top: 200px;
-}
 #wrap {
     display: block;
     margin: 0 auto;
