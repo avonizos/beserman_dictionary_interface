@@ -215,10 +215,10 @@ def find_examples(lemma, n):
 
 def load_corpus(fname):
     global index_corpus
-    corpusTree = etree.parse(fname)
-    phrases = corpusTree.xpath(u'/document/interlinear-text/paragraphs/paragraph/phrases/phrase')
     if not os.path.isfile('index.db'):
         print 'Making index...'
+        corpusTree = etree.parse(fname)
+        phrases = corpusTree.xpath(u'/document/interlinear-text/paragraphs/paragraph/phrases/phrase')
         create_index('corpus.xml')
         if not os.path.exists(u'phrases'):
             os.makedirs(u'phrases')
