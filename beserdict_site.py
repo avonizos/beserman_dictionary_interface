@@ -15,8 +15,6 @@ app.secret_key = 'k_bXnlu654Q'
 sessionData = {}    # session key -> dictionary with the data for current session
 dictTree = None
 lemmas = {}
-corpusTree = None
-phrases = []
 index_corpus = {}
 recently = []
 
@@ -47,8 +45,6 @@ def create_index(fname):
 
 
 def find_entry(lemma, trans):
-    global phrases
-
     entryEl = find_element(lemma)
     if entryEl is None:
         return jsonify(entryHtml=u'nonono')
@@ -131,9 +127,18 @@ def find_entry(lemma, trans):
                 exGoesToDictEl = exampleEl.xpath(u'Example.ExGoesToDict')
                 exTextEl = exampleEl.xpath(u'Example.ExText')
                 exTransEl = exampleEl.xpath(u'Example.ExTrans')
-                example[u'exGoesToDict'] = unicode(exGoesToDictEl[0].xpath(u'string()'))
-                example[u'exText'] = unicode(exTextEl[0].xpath(u'string()'))
-                example[u'exTrans'] = unicode(exTransEl[0].xpath(u'string()'))
+                if len(exGoesToDictEl) > 0:
+                    example[u'exGoesToDict'] = unicode(exGoesToDictEl[0].xpath(u'string()'))
+                else:
+                    example[u'exGoesToDict'] = u''
+                if len(exTextEl) > 0:
+                    example[u'exText'] = unicode(exTextEl[0].xpath(u'string()'))
+                else:
+                    example[u'exText'] = u''
+                if len(exTransEl) > 0:
+                    example[u'exTrans'] = unicode(exTransEl[0].xpath(u'string()'))
+                else:
+                    example[u'exTrans'] = u''
                 value[u'examples'].append(example)
             psBlock[u'values'].append(value)
 
@@ -151,9 +156,15 @@ def find_entry(lemma, trans):
     return entry
 
 
-def find_examples(lemma, n):
-    global phrases
+def get_phrase(i):
+    try:
+        root = etree.parse(u'phrases/' + str(i) + u'.xml')
+        print i
+        return root
+    except:
+        return None
 
+def find_examples(lemma, n):
     # case for verbs
     stem = ''
     if lemma.endswith(u'ənə'):
@@ -161,10 +172,11 @@ def find_examples(lemma, n):
     elif lemma.endswith(u'nə'):
         stem = lemma[:-2]
     found_words = []
+    lemma = convert_output(lemma, 'corpus')
 
     if stem != '':
         for word in index_corpus.keys():
-            if stem in word:
+            if word.startswith(stem):
                 found_words.append(word)
     else:
         found_words = [lemma]
@@ -184,7 +196,7 @@ def find_examples(lemma, n):
         if lemma in index_corpus.keys():
             foundIds = index_corpus[lemma]
             for i in foundIds:
-                foundPhrases.append(phrases[int(i)])
+                foundPhrases.append(get_phrase(int(i)))
     i = 1
     for foundPhrase in foundPhrases[:n]:
             wordEls = foundPhrase.xpath(u'words/word/item')
@@ -194,19 +206,26 @@ def find_examples(lemma, n):
                     resultPhrase += u' '
                 resultPhrase += unicode(wordEl.xpath(u'string()'))
             translationEl = foundPhrase.xpath(u'item[@type="gls" and @lang="ru"]')
-            resultPhrase += u' - ' + unicode(translationEl[0].xpath(u'string() '))
+            if len(translationEl) > 0:
+                resultPhrase += u' - ' + unicode(translationEl[0].xpath(u'string() '))
             prettyPhrases.append(str(i) + '. ' + resultPhrase)
             i += 1
     return prettyPhrases
 
 
 def load_corpus(fname):
-    global corpusTree, phrases, index_corpus
+    global index_corpus
     corpusTree = etree.parse(fname)
     phrases = corpusTree.xpath(u'/document/interlinear-text/paragraphs/paragraph/phrases/phrase')
     if not os.path.isfile('index.db'):
         print 'Making index...'
         create_index('corpus.xml')
+        if not os.path.exists(u'phrases'):
+            os.makedirs(u'phrases')
+        for i in range(len(phrases)):
+            f = codecs.open(u'phrases/' + str(i) + u'.xml', 'w', 'utf-8')
+            f.write(etree.tostring(phrases[i]))
+            f.close()
     f = codecs.open('index.db', 'r', 'utf-8')
     find_word = re.compile('([^0-9\|, ]*)|')
     find_ids = re.compile('[0-9]+')
@@ -300,7 +319,7 @@ def index():
 @app.route('/_get_entry')
 def get_entry():
     # Consider the type of transcription
-    lemma = request.args.get('lemma', u'', type=unicode).replace(u"'", u'')
+    lemma = request.args.get('lemma', u'', type=unicode).replace(u"'", u'').replace(u'"', u'')
     trans = request.args.get('trans', u'', type=unicode)
     req = convert_input(lemma, trans)
     entry = find_entry(req, trans)
